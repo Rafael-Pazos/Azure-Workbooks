@@ -1,0 +1,561 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# Secure Score Summary\r\n\r\n"
+      },
+      "customWidth": "100",
+      "name": "text - 0",
+      "styleSettings": {
+        "margin": "0",
+        "padding": "0"
+      }
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "title": "Group 1",
+        "expandable": true,
+        "expanded": true,
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "## \"D Trucks 1\""
+            },
+            "customWidth": "30",
+            "name": "text - 3"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "8a708474-89b6-4254-8e39-0ff78e31d22b",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "Subscriptions",
+                  "type": 6,
+                  "isRequired": true,
+                  "multiSelect": true,
+                  "quote": "'",
+                  "delimiter": ",",
+                  "value": [
+                    "/subscriptions/95b44dd6-5808-485e-9f1a-923eaeef3b37"
+                  ],
+                  "typeSettings": {
+                    "additionalResourceOptions": [
+                      "value::all"
+                    ],
+                    "includeAll": true,
+                    "selectAllValue": "",
+                    "showDefault": false
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "customWidth": "30",
+            "name": "parameters - 0"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/securescores\"\r\n| extend subscriptionSecureScore = round(100 * bin((todouble(properties.score.current))/ todouble(properties.score.max), 0.001))\r\n| where subscriptionSecureScore > 0\r\n| project subscriptionSecureScore, subscriptionId\r\n| order by subscriptionSecureScore asc",
+              "size": 1,
+              "title": "Secure Score per Subscription",
+              "noDataMessage": "The query returned no results.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscriptions}"
+              ],
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "subscriptionSecureScore",
+                    "formatter": 8,
+                    "formatOptions": {
+                      "min": 0,
+                      "max": 100,
+                      "palette": "redGreen",
+                      "compositeBarSettings": {
+                        "labelText": "",
+                        "columnSettings": []
+                      }
+                    },
+                    "numberFormat": {
+                      "unit": 1,
+                      "options": {
+                        "style": "decimal",
+                        "useGrouping": false
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "subscriptionId",
+                    "formatter": 15,
+                    "formatOptions": {
+                      "linkTarget": null,
+                      "customColumnWidthSetting": "100%"
+                    }
+                  }
+                ],
+                "rowLimit": 5
+              },
+              "sortBy": []
+            },
+            "customWidth": "40",
+            "showPin": true,
+            "name": "query - 1"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n | where type == \"microsoft.security/assessments\"\r\n // Get recommendations in useful format\r\n | project\r\n\t['TenantID'] = tenantId,\r\n\t['SubscriptionID'] = subscriptionId,\r\n\t['AssessmentID'] = name,\r\n\t['DisplayName'] = properties.displayName,\r\n\t['ResourceType'] = tolower(split(properties.resourceDetails.Id,\"/\").[7]),\r\n\t['ResourceName'] = tolower(split(properties.resourceDetails.Id,\"/\").[8]),\r\n\t['ResourceGroup'] = resourceGroup,\r\n\t['ContainsNestedRecom'] = tostring(properties.additionalData.subAssessmentsLink),\r\n\t['StatusCode'] = properties.status.code,\r\n\t['StatusDescription'] = properties.status.description,\r\n\t['PolicyDefID'] = properties.metadata.policyDefinitionId,\r\n\t['Description'] = properties.metadata.description,\r\n\t['RecomType'] = properties.metadata.assessmentType,\r\n\t['Remediation'] = properties.metadata.remediationDescription,\r\n\t['RemediationEffort'] = properties.metadata.implementationEffort,\r\n\t['Severity'] = properties.metadata.severity,\r\n\t['Categories'] = properties.metadata.categories,\r\n\t['UserImpact'] = properties.metadata.userImpact,\r\n\t['Threats'] = properties.metadata.threats,\r\n\t['Link'] = properties.links.azurePortal\r\n    // summarize and order\r\n | summarize count() by tostring(Severity)\r\n | order by count_",
+              "size": 1,
+              "title": "Number of HIGH, MEDIUM and LOW Recommendations",
+              "noDataMessageStyle": 4,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscriptions}"
+              ],
+              "gridSettings": {
+                "sortBy": [
+                  {
+                    "itemKey": "Severity",
+                    "sortOrder": 1
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "Severity",
+                  "sortOrder": 1
+                }
+              ]
+            },
+            "name": "query - 4"
+          }
+        ]
+      },
+      "customWidth": "50",
+      "name": "group 1",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "title": "Group 2",
+        "expandable": true,
+        "expanded": true,
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "## \"D Trucks 2\""
+            },
+            "customWidth": "30",
+            "name": "text - 3"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "8a708474-89b6-4254-8e39-0ff78e31d22b",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "Subscriptions",
+                  "type": 6,
+                  "isRequired": true,
+                  "multiSelect": true,
+                  "quote": "'",
+                  "delimiter": ",",
+                  "value": [
+                    "/subscriptions/212f9889-769e-45ae-ab43-6da33674bd26"
+                  ],
+                  "typeSettings": {
+                    "additionalResourceOptions": [
+                      "value::all"
+                    ],
+                    "includeAll": true,
+                    "selectAllValue": "",
+                    "showDefault": false
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "customWidth": "30",
+            "name": "parameters - 0"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/securescores\"\r\n| extend subscriptionSecureScore = round(100 * bin((todouble(properties.score.current))/ todouble(properties.score.max), 0.001))\r\n| where subscriptionSecureScore > 0\r\n| project subscriptionSecureScore, subscriptionId\r\n| order by subscriptionSecureScore asc",
+              "size": 1,
+              "title": "Secure Score per Subscription",
+              "noDataMessage": "The query returned no results.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscriptions}"
+              ],
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "subscriptionSecureScore",
+                    "formatter": 8,
+                    "formatOptions": {
+                      "min": 0,
+                      "max": 100,
+                      "palette": "redGreen",
+                      "compositeBarSettings": {
+                        "labelText": "",
+                        "columnSettings": []
+                      }
+                    },
+                    "numberFormat": {
+                      "unit": 1,
+                      "options": {
+                        "style": "decimal",
+                        "useGrouping": false
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "subscriptionId",
+                    "formatter": 15,
+                    "formatOptions": {
+                      "linkTarget": null,
+                      "customColumnWidthSetting": "100%"
+                    }
+                  }
+                ],
+                "rowLimit": 1000
+              },
+              "sortBy": []
+            },
+            "customWidth": "40",
+            "showPin": true,
+            "name": "query - 1"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n | where type == \"microsoft.security/assessments\"\r\n // Get recommendations in useful format\r\n | project\r\n\t['TenantID'] = tenantId,\r\n\t['SubscriptionID'] = subscriptionId,\r\n\t['AssessmentID'] = name,\r\n\t['DisplayName'] = properties.displayName,\r\n\t['ResourceType'] = tolower(split(properties.resourceDetails.Id,\"/\").[7]),\r\n\t['ResourceName'] = tolower(split(properties.resourceDetails.Id,\"/\").[8]),\r\n\t['ResourceGroup'] = resourceGroup,\r\n\t['ContainsNestedRecom'] = tostring(properties.additionalData.subAssessmentsLink),\r\n\t['StatusCode'] = properties.status.code,\r\n\t['StatusDescription'] = properties.status.description,\r\n\t['PolicyDefID'] = properties.metadata.policyDefinitionId,\r\n\t['Description'] = properties.metadata.description,\r\n\t['RecomType'] = properties.metadata.assessmentType,\r\n\t['Remediation'] = properties.metadata.remediationDescription,\r\n\t['RemediationEffort'] = properties.metadata.implementationEffort,\r\n\t['Severity'] = properties.metadata.severity,\r\n\t['Categories'] = properties.metadata.categories,\r\n\t['UserImpact'] = properties.metadata.userImpact,\r\n\t['Threats'] = properties.metadata.threats,\r\n\t['Link'] = properties.links.azurePortal\r\n    // summarize and order\r\n | summarize count() by tostring(Severity)\r\n | order by count_",
+              "size": 1,
+              "title": "Number of HIGH, MEDIUM and LOW Recommendations",
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscriptions}"
+              ]
+            },
+            "name": "query - 4"
+          }
+        ]
+      },
+      "customWidth": "50",
+      "name": "group 2",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "title": "Group 3",
+        "expandable": true,
+        "expanded": true,
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "## \"D Trucks 3\""
+            },
+            "customWidth": "30",
+            "name": "text - 3"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "8a708474-89b6-4254-8e39-0ff78e31d22b",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "Subscriptions",
+                  "type": 6,
+                  "isRequired": true,
+                  "multiSelect": true,
+                  "quote": "'",
+                  "delimiter": ",",
+                  "value": [
+                    "/subscriptions/5733bcb3-7fde-4caf-8629-41dc15e3b352",
+                    "/subscriptions/ebb79bc0-aa86-44a7-8111-cabbe0c43993"
+                  ],
+                  "typeSettings": {
+                    "additionalResourceOptions": [
+                      "value::all"
+                    ],
+                    "includeAll": true,
+                    "selectAllValue": "",
+                    "showDefault": false
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "customWidth": "30",
+            "name": "parameters - 0"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/securescores\"\r\n| extend subscriptionSecureScore = round(100 * bin((todouble(properties.score.current))/ todouble(properties.score.max), 0.001))\r\n| where subscriptionSecureScore > 0\r\n| project subscriptionSecureScore, subscriptionId\r\n| order by subscriptionSecureScore asc",
+              "size": 1,
+              "title": "Secure Score per Subscription",
+              "noDataMessage": "The query returned no results.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscriptions}"
+              ],
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "subscriptionSecureScore",
+                    "formatter": 8,
+                    "formatOptions": {
+                      "min": 0,
+                      "max": 100,
+                      "palette": "redGreen",
+                      "compositeBarSettings": {
+                        "labelText": "",
+                        "columnSettings": []
+                      }
+                    },
+                    "numberFormat": {
+                      "unit": 1,
+                      "options": {
+                        "style": "decimal",
+                        "useGrouping": false
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "subscriptionId",
+                    "formatter": 15,
+                    "formatOptions": {
+                      "linkTarget": null,
+                      "customColumnWidthSetting": "100%"
+                    }
+                  }
+                ],
+                "rowLimit": 1000
+              },
+              "sortBy": []
+            },
+            "customWidth": "40",
+            "showPin": true,
+            "name": "query - 1"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n | where type == \"microsoft.security/assessments\"\r\n // Get recommendations in useful format\r\n | project\r\n\t['TenantID'] = tenantId,\r\n\t['SubscriptionID'] = subscriptionId,\r\n\t['AssessmentID'] = name,\r\n\t['DisplayName'] = properties.displayName,\r\n\t['ResourceType'] = tolower(split(properties.resourceDetails.Id,\"/\").[7]),\r\n\t['ResourceName'] = tolower(split(properties.resourceDetails.Id,\"/\").[8]),\r\n\t['ResourceGroup'] = resourceGroup,\r\n\t['ContainsNestedRecom'] = tostring(properties.additionalData.subAssessmentsLink),\r\n\t['StatusCode'] = properties.status.code,\r\n\t['StatusDescription'] = properties.status.description,\r\n\t['PolicyDefID'] = properties.metadata.policyDefinitionId,\r\n\t['Description'] = properties.metadata.description,\r\n\t['RecomType'] = properties.metadata.assessmentType,\r\n\t['Remediation'] = properties.metadata.remediationDescription,\r\n\t['RemediationEffort'] = properties.metadata.implementationEffort,\r\n\t['Severity'] = properties.metadata.severity,\r\n\t['Categories'] = properties.metadata.categories,\r\n\t['UserImpact'] = properties.metadata.userImpact,\r\n\t['Threats'] = properties.metadata.threats,\r\n\t['Link'] = properties.links.azurePortal\r\n    // summarize and order\r\n | summarize count() by tostring(Severity)\r\n | order by count_",
+              "size": 1,
+              "title": " Number of HIGH, MEDIUM and LOW Recommendations",
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscriptions}"
+              ]
+            },
+            "name": "query - 4"
+          }
+        ]
+      },
+      "customWidth": "50",
+      "name": "group 3",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "title": "Group 4",
+        "expandable": true,
+        "expanded": true,
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "## \"D Trucks 4\""
+            },
+            "customWidth": "30",
+            "name": "text - 3"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "8a708474-89b6-4254-8e39-0ff78e31d22b",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "Subscriptions",
+                  "type": 6,
+                  "isRequired": true,
+                  "multiSelect": true,
+                  "quote": "'",
+                  "delimiter": ",",
+                  "value": [
+                    "/subscriptions/45f9252d-e27e-4ed8-ab4e-dc5054de13fa"
+                  ],
+                  "typeSettings": {
+                    "additionalResourceOptions": [
+                      "value::all"
+                    ],
+                    "includeAll": true,
+                    "selectAllValue": "",
+                    "showDefault": false
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "customWidth": "30",
+            "name": "parameters - 0"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/securescores\"\r\n| extend subscriptionSecureScore = round(100 * bin((todouble(properties.score.current))/ todouble(properties.score.max), 0.001))\r\n| where subscriptionSecureScore > 0\r\n| project subscriptionSecureScore, subscriptionId\r\n| order by subscriptionSecureScore asc",
+              "size": 1,
+              "title": "Secure Score per Subscription",
+              "noDataMessage": "The query returned no results.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscriptions}"
+              ],
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "subscriptionSecureScore",
+                    "formatter": 8,
+                    "formatOptions": {
+                      "min": 0,
+                      "max": 100,
+                      "palette": "redGreen",
+                      "compositeBarSettings": {
+                        "labelText": "",
+                        "columnSettings": []
+                      }
+                    },
+                    "numberFormat": {
+                      "unit": 1,
+                      "options": {
+                        "style": "decimal",
+                        "useGrouping": false
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "subscriptionId",
+                    "formatter": 15,
+                    "formatOptions": {
+                      "linkTarget": null,
+                      "customColumnWidthSetting": "100%"
+                    }
+                  }
+                ],
+                "rowLimit": 1000
+              },
+              "sortBy": []
+            },
+            "customWidth": "40",
+            "showPin": true,
+            "name": "query - 1"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n | where type == \"microsoft.security/assessments\"\r\n // Get recommendations in useful format\r\n | project\r\n\t['TenantID'] = tenantId,\r\n\t['SubscriptionID'] = subscriptionId,\r\n\t['AssessmentID'] = name,\r\n\t['DisplayName'] = properties.displayName,\r\n\t['ResourceType'] = tolower(split(properties.resourceDetails.Id,\"/\").[7]),\r\n\t['ResourceName'] = tolower(split(properties.resourceDetails.Id,\"/\").[8]),\r\n\t['ResourceGroup'] = resourceGroup,\r\n\t['ContainsNestedRecom'] = tostring(properties.additionalData.subAssessmentsLink),\r\n\t['StatusCode'] = properties.status.code,\r\n\t['StatusDescription'] = properties.status.description,\r\n\t['PolicyDefID'] = properties.metadata.policyDefinitionId,\r\n\t['Description'] = properties.metadata.description,\r\n\t['RecomType'] = properties.metadata.assessmentType,\r\n\t['Remediation'] = properties.metadata.remediationDescription,\r\n\t['RemediationEffort'] = properties.metadata.implementationEffort,\r\n\t['Severity'] = properties.metadata.severity,\r\n\t['Categories'] = properties.metadata.categories,\r\n\t['UserImpact'] = properties.metadata.userImpact,\r\n\t['Threats'] = properties.metadata.threats,\r\n\t['Link'] = properties.links.azurePortal\r\n    // summarize and order\r\n | summarize count() by tostring(Severity)\r\n | order by count_",
+              "size": 1,
+              "title": " Number of HIGH, MEDIUM and LOW Recommendations",
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "{Subscriptions}"
+              ]
+            },
+            "name": "query - 4"
+          }
+        ]
+      },
+      "customWidth": "50",
+      "name": "group 4",
+      "styleSettings": {
+        "showBorder": true
+      }
+    }
+  ],
+  "fallbackResourceIds": [
+    "azure security center"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
